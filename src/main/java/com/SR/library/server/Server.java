@@ -39,12 +39,12 @@ public class Server extends AbstractActor {
   }
 
   public static void main(String[] args) {
-    Config config = ConfigFactory.load(Server.class.getClassLoader(), "Server");
+    Config config = ConfigFactory.load(Server.class.getClassLoader(), "server.conf");
     final ActorSystem system = ActorSystem.create(SERVER_SYSTEM_NAME, config);
     ActorRef orderManager = system.actorOf(OrderManager.props(), "orderManager");
     ActorRef clerkManager = system.actorOf(ClerkManager.props(), "clerkManager");
     ActorRef shelfManager = system.actorOf(ShelfManager.props(), "shelfManager");
-    ActorRef client = system.actorOf(Server.props(orderManager, clerkManager, shelfManager), "server");
+    ActorRef server = system.actorOf(Server.props(orderManager, clerkManager, shelfManager), "server");
 
     System.out.println("Server ready");
 

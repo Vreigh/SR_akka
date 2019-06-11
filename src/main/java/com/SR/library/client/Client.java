@@ -16,8 +16,8 @@ import com.typesafe.config.ConfigFactory;
 
 public class Client extends AbstractActor {
 
-  private static final String CLIENT_SYSTEM_NAME = "library";
-  private static final String SERVER_ADDRESS = "akka://library@127.0.0.1:2552/user/server";
+  private static final String CLIENT_SYSTEM_NAME = "client";
+  private static final String SERVER_ADDRESS = "akka.tcp://library@127.0.0.1:2552/user/server";
   private LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
 
@@ -48,7 +48,7 @@ public class Client extends AbstractActor {
   }
 
   public static void main(String[] args) {
-    Config config = ConfigFactory.load(Client.class.getClassLoader(), "Client");
+    Config config = ConfigFactory.load("client.conf");
     final ActorSystem system = ActorSystem.create(CLIENT_SYSTEM_NAME, config);
     ActorRef client = system.actorOf(Client.props(), "client");
 
