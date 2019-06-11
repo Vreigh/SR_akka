@@ -6,9 +6,10 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.SR.library.server.request.OrderRequest;
 import com.SR.library.server.request.SearchRequest;
-import com.SR.library.server.worker.ClerkManager;
-import com.SR.library.server.worker.OrderManager;
-import com.SR.library.server.worker.ShelfManager;
+import com.SR.library.server.request.StreamRequest;
+import com.SR.library.server.worker.database.DatabaseManager;
+import com.SR.library.server.worker.order.OrderManager;
+import com.SR.library.server.worker.stream.StreamManager;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import lombok.AllArgsConstructor;
@@ -22,11 +23,11 @@ public class Server extends AbstractActor {
   private static final String SERVER_SYSTEM_NAME = "library";
 
   private final ActorRef orderManager;
-  private final ActorRef clerkManager;
-  private final ActorRef shelfManager;
+  private final ActorRef databaseManager;
+  private final ActorRef streamManager;
 
-  public static Props props(ActorRef orderManager, ActorRef clerkManager, ActorRef shelfManager) {
-    return Props.create(Server.class, () -> new Server(orderManager, clerkManager, shelfManager));
+  public static Props props(ActorRef orderManager, ActorRef databaseManager, ActorRef streamManager) {
+    return Props.create(Server.class, () -> new Server(orderManager, databaseManager, streamManager));
   }
 
   @Override
@@ -34,17 +35,19 @@ public class Server extends AbstractActor {
     return receiveBuilder().match(OrderRequest.class, orderRequest -> {
       orderManager.tell(orderRequest, self());
     }).match(SearchRequest.class, searchRequest -> {
-      clerkManager.tell(searchRequest, self());
-    }).match(String.class, str -> System.out.println(str)).build();
+      databaseManager.tell(searchRequest, self());
+    }).match(StreamRequest.class, streamRequest -> {
+      streamManager.tell(streamRequest, self());
+    }).build();
   }
 
   public static void main(String[] args) {
     Config config = ConfigFactory.load(Server.class.getClassLoader(), "server.conf");
     final ActorSystem system = ActorSystem.create(SERVER_SYSTEM_NAME, config);
     ActorRef orderManager = system.actorOf(OrderManager.props(), "orderManager");
-    ActorRef clerkManager = system.actorOf(ClerkManager.props(), "clerkManager");
-    ActorRef shelfManager = system.actorOf(ShelfManager.props(), "shelfManager");
-    ActorRef server = system.actorOf(Server.props(orderManager, clerkManager, shelfManager), "server");
+    ActorRef databaseManager = system.actorOf(DatabaseManager.props(), "databaseManager");
+    ActorRef streamManager = system.actorOf(StreamManager.props(), "streamManager");
+    ActorRef server = system.actorOf(Server.props(orderManager, databaseManager, streamManager), "server");
 
     System.out.println("Server ready");
 

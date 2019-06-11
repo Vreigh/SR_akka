@@ -4,22 +4,20 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.io.Serializable;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class SearchResponse extends AbstractResponse implements Serializable {
+public class StreamResponse extends AbstractResponse {
 
-  private String price;
+  private String sentence;
 
-  public SearchResponse(ResponseStatus status, String price) {
+  public StreamResponse(ResponseStatus status, String sentence) {
     super(status);
-    this.price = price;
+    this.sentence = sentence;
   }
 
   @Override
   public String show() {
-    return price;
+    return sentence;
   }
 }

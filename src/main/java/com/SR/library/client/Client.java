@@ -1,25 +1,26 @@
 package com.SR.library.client;
 
+import com.SR.library.client.command.Command;
+import com.SR.library.client.command.CommandReader;
+import com.SR.library.server.request.OrderRequest;
+import com.SR.library.server.request.SearchRequest;
+import com.SR.library.server.request.StreamRequest;
+import com.SR.library.server.response.AbstractResponse;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-import com.SR.library.client.command.Command;
-import com.SR.library.client.command.CommandReader;
-import com.SR.library.server.request.OrderRequest;
-import com.SR.library.server.request.SearchRequest;
-import com.SR.library.server.response.AbstractResponse;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 public class Client extends AbstractActor {
 
   private static final String CLIENT_SYSTEM_NAME = "client";
   private static final String SERVER_ADDRESS = "akka.tcp://library@127.0.0.1:2552/user/server";
-  private LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
-
+  private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
   @Override
   public Receive createReceive() {
@@ -32,7 +33,7 @@ public class Client extends AbstractActor {
           context().actorSelection(SERVER_ADDRESS).tell(new SearchRequest(self(), command.getTitle()), self());
           break;
         case STREAM:
-          context().actorSelection(SERVER_ADDRESS).tell("test123", self());
+          context().actorSelection(SERVER_ADDRESS).tell(new StreamRequest(self(), command.getTitle()), self());
           break;
       }
     }).match(AbstractResponse.class, this::handleResponse).build();
@@ -66,6 +67,5 @@ public class Client extends AbstractActor {
     }
 
   }
-
 
 }
